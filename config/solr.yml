@@ -1,0 +1,5 @@
+---
+development:
+  url: http://localhost:8983/solr/valkyrie_classic_development
+test:
+  url: http://localhost:9983/solr/valkyrie_classic_test

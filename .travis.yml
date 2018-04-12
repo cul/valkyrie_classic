@@ -1,0 +1,22 @@
+language: ruby
+cache: bundler
+sudo: false
+
+rvm:
+  - 2.4.2
+  - 2.3.4
+  - 2.2.6
+  
+jdk: 'oraclejdk8'
+
+notifications:
+  irc: "irc.freenode.org#ldpddev"
+
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+
+before_script:
+  - bundle exec rake valkyrie_classic:setup:config_files
+  
+script: bundle exec rake valkyrie_classic:ci
