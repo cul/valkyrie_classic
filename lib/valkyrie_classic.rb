@@ -4,6 +4,11 @@ require 'rsolr'
 module Valkyrie
   module Classic
     require 'valkyrie_classic/version'
+    require 'valkyrie_classic/persistence'
+    require 'valkyrie_classic/persistence/fedora3'
+    require 'valkyrie_classic/persistence/fedora3/metadata_adapter'
+    require 'valkyrie_classic/persistence/fedora3/persister'
+    require 'valkyrie_classic/persistence/fedora3/query_service'
     require 'valkyrie_classic/storage'
     require 'valkyrie_classic/storage/fedora3'
 
