@@ -4,16 +4,16 @@ module Valkyrie
     module Persistence
       module Fedora3
         class MetadataAdapter
-          attr_reader :connection
+          include Valkyrie::Classic::InternalApi
 
-          PATTERN = /^info:fedora\/[a-zA-Z][a-zA-Z0-9]+\:[a-zA-Z][a-zA-Z0-9]+/
+          attr_reader :connection
 
           def initialize(connection:)
             @connection = connection
           end
 
           def handles?(id:)
-            id.to_s.match? PATTERN
+            _handles_obj(id: id)
           end
 
           def persister

@@ -3,16 +3,16 @@ module Valkyrie
   module Classic
     module Storage
       class Fedora3
-        attr_reader :connection
+        include Valkyrie::Classic::InternalApi
 
-        PATTERN = /^info:fedora\/[a-zA-Z][a-zA-Z0-9]+\:[a-zA-Z][a-zA-Z0-9]+\/[a-zA-Z][a-zA-Z0-9]+/
+        attr_reader :connection
 
         def initialize(connection:)
           @connection = connection
         end
 
         def handles?(id:)
-          id.to_s.match? PATTERN
+          _handles_ds(id: id)
         end
 
         def find_by(id:)
@@ -44,17 +44,11 @@ module Valkyrie
           else
             raise "not a Fedora 3 resource" unless handles?(id: resource.id.to_s + '/ex')
           end
-          raise "resource does not exist" unless (fedora_obj = _fedora_object(obj_id))
+          raise "resource does not exist" unless (fedora_obj = _fedora_object(obj_id, connection))
           ds = Rubydora::Datastream.new(fedora_obj, dsid || _next_dsid(fedora_obj), dsLabel: original_filename)
           ds.content = file
           ds.save
           find_by(id: "#{obj_id}/#{ds.dsid}")
-        end
-
-        # not part of a public API
-        def _fedora_object(id)
-          id_segments = id.to_s.split('/')
-          connection.find(id_segments[1])
         end
 
         # not part of public API
