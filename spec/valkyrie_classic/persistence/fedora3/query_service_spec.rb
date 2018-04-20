@@ -4,7 +4,9 @@ require 'spec_helper'
 RSpec.describe Valkyrie::Classic::Persistence::Fedora3::QueryService do
   let(:flags) { [:no_deep_nesting, :no_mixed_nesting] }
   context "running integration suite", if: ENV['COVERAGE'] do
-    let(:storage_adapter) { described_class.new(connection: Valkyrie::Classic.fedora_repo) }
+    let(:adapter_class) { Valkyrie::Classic::Persistence::Fedora3::MetadataAdapter }
+    let(:adapter) { adapter_class.new(connection: Valkyrie::Classic.fedora_repo) }
+
     before :all do
       Valkyrie::Classic.fedora_repo.find_or_initialize("test:test").save
     end

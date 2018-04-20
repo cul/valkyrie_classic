@@ -16,7 +16,7 @@ module Valkyrie
 
       def _fedora_object(id, connection, create = false)
         id_segments = id.to_s.split('/')
-        create ? connection.find_or_create(id_segments[1]) : connection.find(id_segments[1])
+        create ? connection.find_or_initialize(id_segments[1]) : connection.find(id_segments[1])
       end
     end
   end

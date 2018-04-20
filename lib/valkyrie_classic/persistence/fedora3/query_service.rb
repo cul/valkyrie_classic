@@ -40,7 +40,7 @@ module Valkyrie
             raise "unimplemented"
           end
 
-          def find_members(resource:, model:)
+          def find_members(resource:, model: nil)
             raise "unimplemented"
           end
 

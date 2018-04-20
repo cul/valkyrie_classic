@@ -30,7 +30,7 @@ module Valkyrie
         def delete(id:)
           return nil unless handles? id: id
           id_segments = id.to_s.split('/')
-          fedora_obj = _fedora_object(id)
+          fedora_obj = _fedora_object(id, connection)
           fedora_obj.datastreams[id_segments[2]].delete
         end
 
