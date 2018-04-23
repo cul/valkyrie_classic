@@ -19,7 +19,7 @@ module Valkyrie
           end
 
           def save(resource:)
-            raise "unhandled resource" unless resource.id.nil? || handles?(id: resource.id)
+            raise "unhandled resource: #{resource.id}" unless resource.id.nil? || handles?(id: resource.id)
             _ensure_multiple_values!(resource)
             obj = _fedora_object(resource.id, connection, true)
             # TODO: apply attribute changes
@@ -35,7 +35,7 @@ module Valkyrie
             resources.each { |resource| save(resource: resource) }
           end
 
-          def delete(resource:, tombstone: true)
+          def delete(resource:, tombstone: false)
             obj = _fedora_object(resource.id, connection)
             return unless obj
             if tombstone

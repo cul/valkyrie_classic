@@ -22,7 +22,12 @@ RSpec.describe Valkyrie::Classic::Persistence::Fedora3::Persister do
         end
 
         def id_for(base_val)
-          "info:fedora/test:#{base_val}" if base_val
+          return "info:fedora/test:#{base_val}" if base_val =~ /^[A-Za-z0-9]+$/
+          base_val
+        end
+
+        def id=(val)
+          super(id_for(val))
         end
       end
     end

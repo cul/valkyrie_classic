@@ -5,6 +5,7 @@ module Valkyrie
   module Classic
     require 'valkyrie_classic/version'
     require 'valkyrie_classic/internal_api'
+    require 'valkyrie_classic/object_resource'
     require 'valkyrie_classic/persistence'
     require 'valkyrie_classic/persistence/fedora3'
     require 'valkyrie_classic/persistence/fedora3/metadata_adapter'
