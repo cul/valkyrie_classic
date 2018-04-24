@@ -5,6 +5,7 @@ module Valkyrie
     module InternalApi
       OBJECT_URI_PATTERN = /^info\:fedora\/[a-zA-Z][a-zA-Z0-9]+\:[a-zA-Z0-9][a-zA-Z0-9]*$/
       DATASTREAM_URI_PATTERN = /^info\:fedora\/[a-zA-Z][a-zA-Z0-9]+\:[a-zA-Z0-9][a-zA-Z0-9]*\/[a-zA-Z][a-zA-Z0-9]+$/
+      PREFIXABLE_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9\-]*$/
 
       def _handles_obj(id:)
         id.to_s.match? OBJECT_URI_PATTERN
@@ -12,6 +13,10 @@ module Valkyrie
 
       def _handles_ds(id:)
         id.to_s.match? DATASTREAM_URI_PATTERN
+      end
+
+      def _prefixable(id:)
+        id.to_s.match? PREFIXABLE_PATTERN
       end
 
       def _fedora_object(id, connection, create = false)

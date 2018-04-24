@@ -7,13 +7,15 @@ module Valkyrie
           include Valkyrie::Classic::InternalApi
 
           attr_reader :connection
+          attr_reader :adapter
 
-          def initialize(connection:)
+          def initialize(connection:, adapter:)
             @connection = connection
+            @adapter = adapter
           end
 
           def handles?(id:)
-            _handles_obj(id: id)
+            _handles_obj(id: id) || _prefixable(id: id)
           end
 
           def custom_queries
@@ -29,11 +31,12 @@ module Valkyrie
           end
 
           def find_by(id:)
-            raise ArgumentError, "id must be Valkyrie::ID or String" unless _valid_id_class(id)
+            raise ArgumentError, "id<#{id.class}> must be Valkyrie::ID or String" unless _valid_id_class(id)
             raise Valkyrie::Persistence::ObjectNotFoundError, "not a Valkyrie::Classic resource ID" unless handles?(id: id)
-            resource = Valkyrie::Classic::ObjectResource.new(id: id)
-            raise Valkyrie::Persistence::ObjectNotFoundError, id.to_s unless resource.persisted?
-            resource
+            obj = _fedora_object(adapter.id_to_uri(id: id), connection, true)
+            raise Valkyrie::Persistence::ObjectNotFoundError, id.to_s if obj.new?
+            resource_class = adapter.resource_class_from_fedora(obj)
+            resource_class.new(id: id, new_record: false)
           end
 
           def find_by_alternate_identifier(alternate_identifier:)

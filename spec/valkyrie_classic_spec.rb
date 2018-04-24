@@ -21,5 +21,14 @@ describe Valkyrie::Classic do
       expect(test_obj._handles_obj(id: "info:fedora/changeme:24")).to be true
       expect(test_obj._handles_obj(id: "info:fedora/changeme:24/DC")).to be false
     end
+    it "#_handles_ds" do
+      expect(test_obj._handles_ds(id: "info:fedora/changeme:24/DC")).to be true
+      expect(test_obj._handles_ds(id: "info:fedora/changeme:24")).to be false
+    end
+    it "#_prefixable" do
+      expect(test_obj._prefixable(id: "24")).to be true
+      expect(test_obj._prefixable(id: SecureRandom.uuid)).to be true
+      expect(test_obj._prefixable(id: "info:fedora")).to be false
+    end
   end
 end
