@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+require 'rdf/ntriples'
+
 module Valkyrie
   module Classic
     module Persistence
@@ -23,9 +25,12 @@ module Valkyrie
             _ensure_multiple_values!(resource)
             obj = _fedora_object(adapter.id_to_uri(id: resource.id), connection, true)
             # TODO: apply attribute changes
+
             obj.save
             # TODO: deal with externally applied/legacy cmodel statements
+            _apply_attributes(obj, resource)
             _ensure_model("info:fedora/valkyrie:#{resource.class.name}", obj)
+            obj.save
             resource.id = obj.uri unless resource.id
             resource.created_at = obj.createdDate
             resource.updated_at = obj.lastModifiedDate
@@ -57,13 +62,26 @@ module Valkyrie
           end
 
           def _ensure_model(model, obj)
-            return if obj.profile['objModels'].include? model
+            return if obj.models.include? model
             obj.models << model
-            obj.save
           end
 
-          def _desc_metadata(obj)
-            obj.datastreams['descMetadata']
+          def _ensure_desc_metadata(obj)
+            return if obj.datastreams.keys.include? 'descMetadata'
+            obj.datastreams['descMetadata'] = Rubydora::Datastream.new(obj, 'descMetadata', mimeType: 'application/n-triples', controlGroup: 'M')
+          end
+
+          def _apply_attributes(obj, resource)
+            _ensure_desc_metadata(obj)
+            graph = RDF::Graph.new
+            graph.from_ntriples(obj.datastreams['descMetadata'].content || "")
+            resource.attributes.each do |attribute, values|
+              Array(values).each do |value|
+                value = RDF::URI(adapter.id_to_uri(id: value.id)) if value.is_a?(Valkyrie::Resource)
+                graph << RDF::Statement.new(RDF::URI(obj.uri), RDF::URI("info:valkyrie/#{attribute}"), value)
+              end
+            end
+            obj.datastreams['descMetadata'].content = graph.dump(:ntriples)
           end
         end
       end

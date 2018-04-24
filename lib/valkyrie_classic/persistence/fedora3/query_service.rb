@@ -36,7 +36,9 @@ module Valkyrie
             obj = _fedora_object(adapter.id_to_uri(id: id), connection, true)
             raise Valkyrie::Persistence::ObjectNotFoundError, id.to_s if obj.new?
             resource_class = adapter.resource_class_from_fedora(obj)
-            resource_class.new(id: id, new_record: false)
+            resource = resource_class.new(id: id, new_record: false)
+            _apply_attributes(obj, resource)
+            resource
           end
 
           def find_by_alternate_identifier(alternate_identifier:)
@@ -46,7 +48,15 @@ module Valkyrie
 
           def find_many_by_ids(ids:)
             raise ArgumentError, "id must be Valkyrie::ID or String" if ids.detect { |id| !_valid_id_class(id) }
-            raise "unimplemented"
+            result = []
+            ids.each do |id|
+              begin
+                result << find_by(id: id)
+              rescue Valkyrie::Persistence::ObjectNotFoundError
+                result.length
+              end
+            end
+            result
           end
 
           def find_members(resource:, model: nil)
@@ -64,6 +74,19 @@ module Valkyrie
 
           def find_parents(resource:)
             raise "unimplemented"
+          end
+
+          def _apply_attributes(obj, resource)
+            graph = RDF::Graph.new
+            graph.from_ntriples(obj.datastreams['descMetadata'].content || "")
+            atts = Hash.new { |hash, key| hash[key] = [] }
+            graph.each do |statement|
+              next unless statement.subject == RDF::URI(adapter.id_to_uri(id: resource.id))
+              next unless statement.predicate.to_s.start_with?("info:valkyrie/")
+              attribute = statement.predicate.to_s.sub("info:valkyrie/", '').to_sym
+              atts[attribute] << statement.object
+            end
+            atts.each { |att, vals| resource.send("#{att}=".to_sym, vals) }
           end
         end
       end

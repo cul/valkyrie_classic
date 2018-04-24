@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'valkyrie'
   spec.add_dependency 'rubydora'
   spec.add_dependency 'rsolr'
+  spec.add_dependency 'rdf'
 
   spec.add_development_dependency "bundler", "~> 1.13"
   spec.add_development_dependency "rake", "~> 10.0"
