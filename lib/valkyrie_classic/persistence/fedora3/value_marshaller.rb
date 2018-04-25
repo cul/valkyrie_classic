@@ -8,6 +8,7 @@ module Valkyrie
         VALKYRIE_BOOLEAN_TYPE = VALKYRIE_TYPE.boolean
         VALKYRIE_DATETIME_TYPE = VALKYRIE_TYPE.datetime
         VALKYRIE_INTEGER_TYPE = VALKYRIE_TYPE.integer
+        VALKYRIE_TIME_TYPE = VALKYRIE_TYPE.time
 
         class ValueMarshaller
           # Register a marshaller.
@@ -152,11 +153,11 @@ module Valkyrie
           end
 
           def marshall(val)
-            RDF::Literal.new(val.rfc3339(3), datatype: VALKYRIE_DATETIME_TYPE)
+            RDF::Literal.new(val.to_i, datatype: VALKYRIE_DATETIME_TYPE)
           end
 
           def unmarshall(val)
-            DateTime.parse(val.object.to_s)
+            Time.utc(*Time.at(val.object.to_i).utc.to_a)
           end
         end
 
@@ -177,6 +178,26 @@ module Valkyrie
 
           def unmarshall(val)
             val.object.to_s.to_i
+          end
+        end
+
+        class TimeMarshaller < ValueMarshaller
+          ValueMarshaller.register(new)
+
+          def marshalls?(val)
+            val.is_a?(Time)
+          end
+
+          def unmarshalls?(val)
+            val.is_a?(RDF::Literal) && val.datatype == VALKYRIE_TIME_TYPE
+          end
+
+          def marshall(val)
+            RDF::Literal.new(val.to_i, datatype: VALKYRIE_TIME_TYPE)
+          end
+
+          def unmarshall(val)
+            Time.utc(*Time.at(val.object.to_i).utc.to_a)
           end
         end
       end
