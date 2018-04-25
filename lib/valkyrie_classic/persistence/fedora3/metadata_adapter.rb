@@ -6,10 +6,11 @@ module Valkyrie
         class MetadataAdapter
           include Valkyrie::Classic::InternalApi
 
-          attr_reader :connection
+          attr_reader :connection, :id_mapper
 
           def initialize(connection:)
             @connection = connection
+            @id_mapper = Valkyrie::Classic::Persistence::Fedora3::IdMarshaller.new
           end
 
           def handles?(id:)
@@ -25,8 +26,7 @@ module Valkyrie
           end
 
           def id_to_uri(id:)
-            return id.to_s if _handles_obj(id: id.to_s)
-            return "info:fedora/valkyrie:#{id}" if _prefixable(id: id.to_s)
+            id_mapper.marshall(id).to_s
           end
 
           def resource_class_from_fedora(obj)

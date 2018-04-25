@@ -81,12 +81,16 @@ module Valkyrie
             graph.from_ntriples(obj.datastreams['descMetadata'].content || "")
             atts = Hash.new { |hash, key| hash[key] = [] }
             graph.each do |statement|
-              next unless statement.subject == RDF::URI(adapter.id_to_uri(id: resource.id))
-              next unless statement.predicate.to_s.start_with?("info:valkyrie/")
-              attribute = statement.predicate.to_s.sub("info:valkyrie/", '').to_sym
-              atts[attribute] << statement.object
+              next unless _attribute_statement?(statement, resource)
+              attribute = statement.predicate.to_s.sub("info:valkyrie/attributes#", '').to_sym
+              map = ValueMarshaller.unmarshaller_for(statement.object)
+              atts[attribute] << map.unmarshall(statement.object)
             end
             atts.each { |att, vals| resource.send("#{att}=".to_sym, vals) }
+          end
+
+          def _attribute_statement?(statement, resource)
+            statement.predicate.to_s.start_with?("info:valkyrie/attributes#") && statement.subject == RDF::URI(adapter.id_to_uri(id: resource.id))
           end
         end
       end

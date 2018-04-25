@@ -77,8 +77,9 @@ module Valkyrie
             graph.from_ntriples(obj.datastreams['descMetadata'].content || "")
             resource.attributes.each do |attribute, values|
               Array(values).each do |value|
-                value = RDF::URI(adapter.id_to_uri(id: value.id)) if value.is_a?(Valkyrie::Resource)
-                graph << RDF::Statement.new(RDF::URI(obj.uri), RDF::URI("info:valkyrie/#{attribute}"), value)
+                value = value.id if value.is_a?(Valkyrie::Resource)
+                value = ValueMarshaller.marshaller_for(value).marshall(value)
+                graph << RDF::Statement.new(RDF::URI(obj.uri), RDF::URI("info:valkyrie/attributes##{attribute}"), value)
               end
             end
             obj.datastreams['descMetadata'].content = graph.dump(:ntriples)

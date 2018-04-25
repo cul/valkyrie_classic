@@ -8,6 +8,7 @@ module Valkyrie
     require 'valkyrie_classic/object_resource'
     require 'valkyrie_classic/persistence'
     require 'valkyrie_classic/persistence/fedora3'
+    require 'valkyrie_classic/persistence/fedora3/value_marshaller'
     require 'valkyrie_classic/persistence/fedora3/metadata_adapter'
     require 'valkyrie_classic/persistence/fedora3/persister'
     require 'valkyrie_classic/persistence/fedora3/query_service'
