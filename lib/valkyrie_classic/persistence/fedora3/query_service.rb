@@ -38,6 +38,9 @@ module Valkyrie
             resource_class = adapter.resource_class_from_fedora(obj)
             resource = resource_class.new(id: id, new_record: false)
             _apply_attributes(obj, resource)
+            resource.created_at = obj.createdDate
+            resource.updated_at = obj.lastModifiedDate
+            resource.new_record = false
             resource
           end
 
