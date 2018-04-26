@@ -85,9 +85,7 @@ module Valkyrie
 
           def _statement_values(resource, graph, attribute, values)
             values = Array(values).map { |value| ValueMarshaller.marshaller_for(value).marshall(value) }
-            attribute_key = attribute.to_sym
-            # member_ids is a magic attribute in Valkyrie 1
-            if attribute_key.eql?(:member_ids) || resource.class.schema[attribute_key].is_a?(Dry::Types::Array)
+            if _is_valkyrie_array_type(resource, attribute)
               [RDF::List.new(subject: nil, graph: graph, values: values)]
             else
               values

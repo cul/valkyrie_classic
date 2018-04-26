@@ -27,6 +27,16 @@ module Valkyrie
       def _valid_id_class(id)
         id.is_a?(Valkyrie::ID) || id.is_a?(String)
       end
+
+      def _is_valkyrie_array_type(resource, attribute_name)
+        attribute_key = attribute_name.to_sym
+        # member_ids is a magic attribute in Valkyrie 1
+        return true if attribute_key.eql?(:member_ids)
+        attribute = resource.class.schema[attribute_key]
+        return false unless attribute.is_a? Dry::Types::Default
+        return attribute.type.type.is_a?(Dry::Types::Array) if attribute.type.is_a? Dry::Types::Constructor
+        false
+      end
     end
   end
 end

@@ -30,5 +30,22 @@ describe Valkyrie::Classic do
       expect(test_obj._prefixable(id: SecureRandom.uuid)).to be true
       expect(test_obj._prefixable(id: "info:fedora")).to be false
     end
+    context "needs a test resource" do
+      before do
+        class MyStruct < Valkyrie::Resource
+          attribute :title
+          attribute :examples, Valkyrie::Types::Array
+        end
+      end
+      after do
+        Object.send(:remove_const, :MyStruct)
+      end
+      it "#_is_valkyrie_array_type" do
+        expect(test_obj._is_valkyrie_array_type(MyStruct.new, :examples)).to be true
+        expect(test_obj._is_valkyrie_array_type(MyStruct.new, :title)).to be false
+        expect(test_obj._is_valkyrie_array_type(MyStruct.new, :examples)).to be true
+        expect(test_obj._is_valkyrie_array_type(MyStruct.new, :member_ids)).to be true
+      end
+    end
   end
 end
