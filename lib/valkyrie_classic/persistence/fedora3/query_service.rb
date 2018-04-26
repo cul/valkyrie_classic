@@ -82,18 +82,29 @@ module Valkyrie
           def _apply_attributes(obj, resource)
             graph = RDF::Graph.new
             graph.from_ntriples(obj.datastreams['descMetadata'].content || "")
+            _collect_attributes(graph, resource).each { |att, vals| resource.send("#{att}=".to_sym, vals) }
+          end
+
+          def _collect_attributes(graph, resource)
             atts = Hash.new { |hash, key| hash[key] = [] }
-            graph.each do |statement|
+            graph.statements.each do |statement|
               next unless _attribute_statement?(statement, resource)
               attribute = statement.predicate.to_s.sub("info:valkyrie/attributes#", '').to_sym
-              map = ValueMarshaller.unmarshaller_for(statement.object)
-              atts[attribute] << map.unmarshall(statement.object)
+              if statement.object.node? # RDF::List
+                atts[attribute].concat _all_list_values(RDF::List.new(subject: statement.object, graph: graph))
+              else
+                atts[attribute] << ValueMarshaller.unmarshaller_for(statement.object).unmarshall(statement.object)
+              end
             end
-            atts.each { |att, vals| resource.send("#{att}=".to_sym, vals) }
+            atts
           end
 
           def _attribute_statement?(statement, resource)
             statement.predicate.to_s.start_with?("info:valkyrie/attributes#") && statement.subject == RDF::URI(adapter.id_to_uri(id: resource.id))
+          end
+
+          def _all_list_values(list)
+            list.map { |value| ValueMarshaller.unmarshaller_for(value).unmarshall(value) }
           end
         end
       end

@@ -76,13 +76,22 @@ module Valkyrie
             graph = RDF::Graph.new
             graph.from_ntriples(obj.datastreams['descMetadata'].content || "")
             resource.attributes.each do |attribute, values|
-              Array(values).each do |value|
-                value = value.id if value.is_a?(Valkyrie::Resource)
-                value = ValueMarshaller.marshaller_for(value).marshall(value)
+              _statement_values(resource, graph, attribute, values).each do |value|
                 graph << RDF::Statement.new(RDF::URI(obj.uri), RDF::URI("info:valkyrie/attributes##{attribute}"), value)
               end
             end
             obj.datastreams['descMetadata'].content = graph.dump(:ntriples)
+          end
+
+          def _statement_values(resource, graph, attribute, values)
+            values = Array(values).map { |value| ValueMarshaller.marshaller_for(value).marshall(value) }
+            attribute_key = attribute.to_sym
+            # member_ids is a magic attribute in Valkyrie 1
+            if attribute_key.eql?(:member_ids) || resource.class.schema[attribute_key].is_a?(Dry::Types::Array)
+              [RDF::List.new(subject: nil, graph: graph, values: values)]
+            else
+              values
+            end
           end
         end
       end
